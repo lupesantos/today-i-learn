@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model errors {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  name        String?   @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  tags        String?   @db.VarChar(255)
+  createdAt   DateTime? @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @db.Timestamptz(6)
+  users       users     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model favoriteerros {
+  id                                 Int       @id @default(autoincrement())
+  userId                             Int
+  errorId                            Int
+  ownerId                            Int
+  createdAt                          DateTime? @default(now()) @db.Timestamptz(6)
+  updatedAt                          DateTime? @default(now()) @db.Timestamptz(6)
+  users_favoriteerros_ownerIdTousers users     @relation("favoriteerros_ownerIdTousers", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_favoriteerros_userIdTousers  users     @relation("favoriteerros_userIdTousers", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model favoritetutorials {
+  id                                     Int       @id @default(autoincrement())
+  userId                                 Int
+  tutorialId                             Int
+  ownerId                                Int
+  createdAt                              DateTime? @default(now()) @db.Timestamptz(6)
+  updatedAt                              DateTime? @default(now()) @db.Timestamptz(6)
+  users_favoritetutorials_ownerIdTousers users     @relation("favoritetutorials_ownerIdTousers", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_favoritetutorials_userIdTousers  users     @relation("favoritetutorials_userIdTousers", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model session {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  token     String
+  createdAt DateTime? @default(now()) @db.Timestamptz(6)
+  users     users     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tutorials {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  name        String?   @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  tags        String?   @db.VarChar(255)
+  createdAt   DateTime? @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @db.Timestamptz(6)
+  users       users     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id                                                 Int                 @id @default(autoincrement())
+  name                                               String?             @db.VarChar(255)
+  email                                              String              @unique @db.VarChar(255)
+  createdAt                                          DateTime?           @default(now()) @db.Timestamptz(6)
+  updatedAt                                          DateTime?           @default(now()) @db.Timestamptz(6)
+  errors                                             errors[]
+  favoriteerros_favoriteerros_ownerIdTousers         favoriteerros[]     @relation("favoriteerros_ownerIdTousers")
+  favoriteerros_favoriteerros_userIdTousers          favoriteerros[]     @relation("favoriteerros_userIdTousers")
+  favoritetutorials_favoritetutorials_ownerIdTousers favoritetutorials[] @relation("favoritetutorials_ownerIdTousers")
+  favoritetutorials_favoritetutorials_userIdTousers  favoritetutorials[] @relation("favoritetutorials_userIdTousers")
+  session                                            session[]
+  tutorials                                          tutorials[]
+}

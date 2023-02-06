@@ -1,0 +1,48 @@
+version: '3'
+services:
+  app_react:
+    build: ./todayilearn-front #troquei aqui
+    container_name: app_react
+    volumes:
+      - build_react:/var/www/html
+    depends_on:
+      - app_node
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    ports:
+      - 2345:5432
+    env_file:
+      - ./todayilearn-back/.env #troquei aqui e adicionei o .env
+    volumes:
+      - volume_postgres:/var/lib/postgresql/data
+
+  app_node:
+    build: ./todayilearn-back #troquei aqui
+    container_name: app_node
+    ports:
+      - 4000:4000
+    env_file:
+      - ./todayilearn-back/.env #troquei aqui e adicionei o .env
+    volumes:
+      - ./todayilearn-back:/usr/src #troquei aqui
+      - /usr/src/node_modules
+    entrypoint: dockerize -wait tcp://postgres:5432 -timeout 20s docker-entrypoint.sh
+    command: 'npm run dev:migrate:run' #alterei no package.json
+    depends_on:
+      - postgres
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - 80:80
+    volumes:
+      - build_react:/var/www/html
+    depends_on:
+      - app_react
+
+volumes:
+  build_react:
+  volume_postgres:
